@@ -41,7 +41,7 @@ insert(Value, List) -> [Value | List].
 
 % Deleting the element with key 'Key' from the db
 deleteitem([], _, X) -> X;
-deleteitem([#item{key=Key} | Tail], Key, NewDb) -> deleteitem(Tail, Key, NewDb);
+deleteitem([#item{key = Key} | Tail], Key, NewDb) -> deleteitem(Tail, Key, NewDb);
 deleteitem([Head | Tail], Key, NewDb) -> deleteitem(Tail, Key, [Head | NewDb]).
 
 % Reading the element from Db
