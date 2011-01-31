@@ -17,25 +17,25 @@ delete(Key) -> pdb ! {delete, Key}.
 
 % :INTERFACE: Reading
 read(Key) ->
-    pdb ! {read, Key, self()},
-    Pid = whereis(pdb),
+    Ref = make_ref(),
+    pdb ! {read, Key, self(), Ref},
     receive
-	{read_answer, Pid, Key, Answer} -> Answer;
+	{read_answer, Ref, Key, Answer} -> Answer;
 	_Other -> {error, no_found}
     end.
 
 % :INTERFACE: Matching
 match(Element) ->
-    pdb ! {match, Element, self()},
-    Pid = whereis(pdb),
+    Ref = make_ref(),
+    pdb ! {match, Element, self(), Ref},
     receive
-	{match_answer, Pid, Element, Answer} -> Answer;
+	{match_answer, Ref, Element, Answer} -> Answer;
 	_Other -> {error, not_found}
     end.
 
 % Internal realization
 
-% Inserting new element at the and of the list
+% Inserting new element at the head of the list
 insert(Value, []) -> [Value];
 insert(Value, List) -> [Value | List].
 
@@ -66,11 +66,11 @@ loop(Data) ->
 	    loop(insert(Value, Data));
 	{delete, Key} ->
 	    loop(deleteitem(Data, Key, []));
-	{read, Key, Reciever} ->
-	    Reciever ! {read_answer, self(), Key, readthrough(Data, Key)},
+	{read, Key, Reciever, Ref} ->
+	    Reciever ! {read_answer, Ref, Key, readthrough(Data, Key)},
 	    loop(Data);
-	{match, Element, Reciever} ->
-	    Reciever ! {match_answer, self(), Element, matching(Data, Element, [])},
+	{match, Element, Reciever, Ref} ->
+	    Reciever ! {match_answer, Ref, Element, matching(Data, Element, [])},
 	    loop(Data);
 	destroy -> ok
     end.
